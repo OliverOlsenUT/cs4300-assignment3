@@ -1,0 +1,41 @@
+NAME: Sudoku 4x4 Instance 1
+DESC: Checks all nums are unique across row, column, and subgrid.
+
+VARS:
+  # Squares - 1-indexed
+  s00: [1,2,3,4]
+  s01: [3]
+  s02: [1,2,3,4]
+  s03: [1,2,3,4]
+  s10: [1,2,3,4]
+  s11: [1,2,3,4]
+  s12: [1,2,3,4]
+  s13: [2]
+  s20: [1]
+  s21: [1,2,3,4]
+  s22: [1,2,3,4]
+  s23: [1,2,3,4]
+  s30: [1,2,3,4]
+  s31: [1,2,3,4]
+  s32: [4]
+  s33: [1,2,3,4]
+
+
+CONS:
+  # subgrid has unique nums
+  alldiff(s00,s01,s10,s11)
+  alldiff(s02,s03,s12,s13)
+  alldiff(s20,s21,s30,s31)
+  alldiff(s22,s23,s32,s33)
+  
+  # row has unique nums
+  alldiff(s00,s01,s02,s03)
+  alldiff(s10,s11,s12,s13)
+  alldiff(s20,s21,s22,s23)
+  alldiff(s30,s31,s32,s33)
+  
+  # column has unique nums
+  alldiff(s00,s10,s20,s30)
+  alldiff(s01,s11,s21,s31)
+  alldiff(s02,s12,s22,s32)
+  alldiff(s03,s13,s23,s33)

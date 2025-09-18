@@ -69,7 +69,7 @@ def c_add10(x: str, y: str, cin: str, z: str, cout: str) -> Constraint:
     return Constraint(scope, pred, f"add10({x},{y},{cin}->{z},{cout})")
 
 # ---------- Simple solver (BT + forward checking) ----------
-def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterable[Assignment]:
+def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None, use_mrv: bool = False) -> Iterable[Assignment]:
     domains = {v: list(ds) for v, ds in csp.domains.items()}
     order = var_order or list(domains.keys())
     cons_by_var: Dict[str, List[Constraint]] = {v: [] for v in domains}
@@ -79,6 +79,8 @@ def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterabl
                 cons_by_var[v].append(c)
 
     assignment: Assignment = {}
+
+    steps = 0
 
     def consistent_with_local(v: str, a: Assignment) -> bool:
         for c in cons_by_var[v]:
@@ -90,14 +92,24 @@ def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterabl
         if idx == len(order):
             yield dict(assignment)
             return
-        v = order[idx]
+        
+        if use_mrv:
+            unassigned_vars = [var for var in order if var not in assignment]
+            v = min(unassigned_vars, key=lambda var: len(domains[var]))
+        else:
+            v = order[idx]
         for val in domains[v]:
+            nonlocal steps
+            steps += 1
             assignment[v] = val
             if consistent_with_local(v, assignment):
                 # forward check
                 pruned = []
                 ok = True
-                for w in order[idx+1:]:
+                
+                future_vars = [w for w in order if w not in assignment]
+                
+                for w in future_vars:
                     removed = []
                     for vv in list(domains[w]):
                         assignment[w] = vv
@@ -116,5 +128,5 @@ def solve_backtracking(csp: CSP, var_order: Optional[List[str]]=None) -> Iterabl
             del assignment[v]
 
     yield from backtrack(0)
-
+    print(f"Complete in {steps} steps.")
 
